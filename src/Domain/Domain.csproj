@@ -6,4 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Exceptions\DomainException.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Exceptions\DomainException.cs" />
+  </ItemGroup>
+
 </Project>
