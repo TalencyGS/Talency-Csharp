@@ -9,5 +9,6 @@ namespace Domain.Repositories
         Task CreateAsync(Usuario usuario);
         Task UpdateAsync(int id, Usuario usuario);
         Task DeleteAsync(int id);
+        Task <Usuario?> GetByEmailAsync(string email);
     }
 }
