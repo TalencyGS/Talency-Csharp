@@ -1,13 +1,10 @@
 ﻿using Application.DTOs.Trilha;
 
-namespace Application.Interfaces
+public interface ITrilhaService
 {
-    public interface ITrilhaService
-    {
-        Task<List<TrilhaResponse>> GetAllAsync();
-        Task<TrilhaDetalheResponse?> GetByIdAsync(int id);
-        Task<TrilhaResponse> CreateAsync(TrilhaRequest request);
-        Task<TrilhaResponse?> UpdateAsync(int id, TrilhaRequest request);
-        Task<bool> DeleteAsync(int id);
-    }
+    Task<TrilhaResponse> GetTrilhaByIdAsync(int id);
+    Task<List<TrilhaResponse>> GetAllTrilhasAsync();
+    Task<TrilhaResponse> CreateTrilhaAsync(TrilhaRequest request);
+    Task<TrilhaResponse> UpdateTrilhaAsync(int id, TrilhaRequest request);
+    Task DeleteTrilhaAsync(int id);
 }
