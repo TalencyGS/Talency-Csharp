@@ -1,7 +1,7 @@
 ﻿
 namespace Application.DTOs.Dashboard
 {
-    public class BadgeResumo
+    public class BadgeResumoResponse
     {
         public string Nome { get; set; }
         public string Descricao { get; set; }

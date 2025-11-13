@@ -9,7 +9,7 @@ namespace Application.DTOs.Dashboard
         public int HabilidadesEvoluidas { get; set; }
 
         public IEnumerable<TrilhaProgressoResumo> Trilhas { get; set; }
-        public IEnumerable<BadgeResumo> Badges { get; set; }
+        public IEnumerable<BadgeResumoResponse> Badges { get; set; }
     }
 
 }
