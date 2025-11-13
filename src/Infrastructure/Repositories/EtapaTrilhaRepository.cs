@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,56 +9,59 @@ namespace Infrastructure.Repositories
 {
     public class EtapaTrilhaRepository : IEtapaTrilhaRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<EtapaTrilha> _etapasTrilha;
 
-        public EtapaTrilhaRepository(OracleDbContext context)
+        public EtapaTrilhaRepository(MongoDbContext context)
         {
-            _context = context;
+            _etapasTrilha = context.EtapasTrilha;
         }
 
         public async Task<List<EtapaTrilha>> GetAllAsync()
         {
-            return await _context.EtapasTrilha.ToListAsync();
+            return await _etapasTrilha
+                .Find(Builders<EtapaTrilha>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<EtapaTrilha?> GetByIdAsync(int id)
         {
-            return await _context.EtapasTrilha.FindAsync(id);
+            var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdEtapa, id);
+
+            return await _etapasTrilha
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<EtapaTrilha>> GetByTrilhaIdAsync(int trilhaId)
         {
-            return await _context.EtapasTrilha
-                .Where(etapa => etapa.IdTrilha == trilhaId)
+            var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdTrilha, trilhaId);
+
+            return await _etapasTrilha
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(EtapaTrilha etapaTrilha)
         {
-            await _context.EtapasTrilha.AddAsync(etapaTrilha);
-            await _context.SaveChangesAsync();
+            await _etapasTrilha.InsertOneAsync(etapaTrilha);
         }
 
         public async Task UpdateAsync(int id, EtapaTrilha etapaTrilha)
         {
-            var existingEtapa = await _context.EtapasTrilha.FindAsync(id);
-            if (existingEtapa != null)
-            {
-                existingEtapa.Titulo = etapaTrilha.Titulo;
-                existingEtapa.Descricao = etapaTrilha.Descricao;
-                existingEtapa.Ordem = etapaTrilha.Ordem;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdEtapa, id);
+
+            var update = Builders<EtapaTrilha>.Update
+                .Set(e => e.Titulo, etapaTrilha.Titulo)
+                .Set(e => e.Descricao, etapaTrilha.Descricao)
+                .Set(e => e.Ordem, etapaTrilha.Ordem);
+
+            await _etapasTrilha.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var etapa = await _context.EtapasTrilha.FindAsync(id);
-            if (etapa != null)
-            {
-                _context.EtapasTrilha.Remove(etapa);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdEtapa, id);
+            await _etapasTrilha.DeleteOneAsync(filter);
         }
     }
 }

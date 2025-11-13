@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,54 +9,57 @@ namespace Infrastructure.Repositories
 {
     public class ProgressoUsuarioRepository : IProgressoUsuarioRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<ProgressoUsuario> _progressoUsuarios;
 
-        public ProgressoUsuarioRepository(OracleDbContext context)
+        public ProgressoUsuarioRepository(MongoDbContext context)
         {
-            _context = context;
+            _progressoUsuarios = context.ProgressoUsuarios;
         }
 
         public async Task<List<ProgressoUsuario>> GetAllAsync()
         {
-            return await _context.ProgressoUsuarios.ToListAsync();
+            return await _progressoUsuarios
+                .Find(Builders<ProgressoUsuario>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<ProgressoUsuario?> GetByIdAsync(int id)
         {
-            return await _context.ProgressoUsuarios.FindAsync(id);
+            var filter = Builders<ProgressoUsuario>.Filter.Eq(p => p.IdProgresso, id);
+
+            return await _progressoUsuarios
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<ProgressoUsuario>> GetByUsuarioIdAsync(int usuarioId)
         {
-            return await _context.ProgressoUsuarios
-                .Where(p => p.IdUsuario == usuarioId)
+            var filter = Builders<ProgressoUsuario>.Filter.Eq(p => p.IdUsuario, usuarioId);
+
+            return await _progressoUsuarios
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(ProgressoUsuario progressoUsuario)
         {
-            await _context.ProgressoUsuarios.AddAsync(progressoUsuario);
-            await _context.SaveChangesAsync();
+            await _progressoUsuarios.InsertOneAsync(progressoUsuario);
         }
 
         public async Task UpdateAsync(int id, ProgressoUsuario progressoUsuario)
         {
-            var existingProgresso = await _context.ProgressoUsuarios.FindAsync(id);
-            if (existingProgresso != null)
-            {
-                existingProgresso.Percentual = progressoUsuario.Percentual;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<ProgressoUsuario>.Filter.Eq(p => p.IdProgresso, id);
+
+            var update = Builders<ProgressoUsuario>.Update
+                .Set(p => p.Percentual, progressoUsuario.Percentual);
+
+            await _progressoUsuarios.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var progresso = await _context.ProgressoUsuarios.FindAsync(id);
-            if (progresso != null)
-            {
-                _context.ProgressoUsuarios.Remove(progresso);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<ProgressoUsuario>.Filter.Eq(p => p.IdProgresso, id);
+            await _progressoUsuarios.DeleteOneAsync(filter);
         }
     }
 }

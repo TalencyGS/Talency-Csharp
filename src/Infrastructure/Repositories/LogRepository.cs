@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,44 +9,47 @@ namespace Infrastructure.Repositories
 {
     public class LogRepository : ILogRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Log> _logs;
 
-        public LogRepository(OracleDbContext context)
+        public LogRepository(MongoDbContext context)
         {
-            _context = context;
+            _logs = context.Logs;
         }
 
         public async Task<List<Log>> GetAllAsync()
         {
-            return await _context.Logs.ToListAsync();
+            return await _logs
+                .Find(Builders<Log>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Log?> GetByIdAsync(int id)
         {
-            return await _context.Logs.FindAsync(id);
+            var filter = Builders<Log>.Filter.Eq(l => l.IdLog, id);
+
+            return await _logs
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Log>> GetByTabelaAsync(string tabela)
         {
-            return await _context.Logs
-                .Where(log => log.Tabela == tabela)
+            var filter = Builders<Log>.Filter.Eq(l => l.Tabela, tabela);
+
+            return await _logs
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(Log log)
         {
-            await _context.Logs.AddAsync(log);
-            await _context.SaveChangesAsync();
+            await _logs.InsertOneAsync(log);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var log = await _context.Logs.FindAsync(id);
-            if (log != null)
-            {
-                _context.Logs.Remove(log);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Log>.Filter.Eq(l => l.IdLog, id);
+            await _logs.DeleteOneAsync(filter);
         }
     }
 }

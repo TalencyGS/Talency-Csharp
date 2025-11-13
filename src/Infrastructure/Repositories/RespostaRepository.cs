@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,55 +9,58 @@ namespace Infrastructure.Repositories
 {
     public class RespostaRepository : IRespostaRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Resposta> _respostas;
 
-        public RespostaRepository(OracleDbContext context)
+        public RespostaRepository(MongoDbContext context)
         {
-            _context = context;
+            _respostas = context.Respostas;
         }
 
         public async Task<List<Resposta>> GetAllAsync()
         {
-            return await _context.Respostas.ToListAsync();
+            return await _respostas
+                .Find(Builders<Resposta>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Resposta?> GetByIdAsync(int id)
         {
-            return await _context.Respostas.FindAsync(id);
+            var filter = Builders<Resposta>.Filter.Eq(r => r.IdResposta, id);
+
+            return await _respostas
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Resposta>> GetByUsuarioIdAsync(int usuarioId)
         {
-            return await _context.Respostas
-                .Where(resposta => resposta.IdUsuario == usuarioId)
+            var filter = Builders<Resposta>.Filter.Eq(r => r.IdUsuario, usuarioId);
+
+            return await _respostas
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(Resposta resposta)
         {
-            await _context.Respostas.AddAsync(resposta);
-            await _context.SaveChangesAsync();
+            await _respostas.InsertOneAsync(resposta);
         }
 
         public async Task UpdateAsync(int id, Resposta resposta)
         {
-            var existingResposta = await _context.Respostas.FindAsync(id);
-            if (existingResposta != null)
-            {
-                existingResposta.ConteudoResposta = resposta.ConteudoResposta;
-                existingResposta.Pontuacao = resposta.Pontuacao;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Resposta>.Filter.Eq(r => r.IdResposta, id);
+
+            var update = Builders<Resposta>.Update
+                .Set(r => r.ConteudoResposta, resposta.ConteudoResposta)
+                .Set(r => r.Pontuacao, resposta.Pontuacao);
+
+            await _respostas.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var resposta = await _context.Respostas.FindAsync(id);
-            if (resposta != null)
-            {
-                _context.Respostas.Remove(resposta);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Resposta>.Filter.Eq(r => r.IdResposta, id);
+            await _respostas.DeleteOneAsync(filter);
         }
     }
 }

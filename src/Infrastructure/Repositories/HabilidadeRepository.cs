@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,48 +9,49 @@ namespace Infrastructure.Repositories
 {
     public class HabilidadeRepository : IHabilidadeRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Habilidade> _habilidades;
 
-        public HabilidadeRepository(OracleDbContext context)
+        public HabilidadeRepository(MongoDbContext context)
         {
-            _context = context;
+            _habilidades = context.Habilidades;
         }
 
         public async Task<List<Habilidade>> GetAllAsync()
         {
-            return await _context.Habilidades.ToListAsync();
+            return await _habilidades
+                .Find(Builders<Habilidade>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Habilidade?> GetByIdAsync(int id)
         {
-            return await _context.Habilidades.FindAsync(id);
+            var filter = Builders<Habilidade>.Filter.Eq(h => h.IdHabilidade, id);
+
+            return await _habilidades
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task CreateAsync(Habilidade habilidade)
         {
-            await _context.Habilidades.AddAsync(habilidade);
-            await _context.SaveChangesAsync();
+            await _habilidades.InsertOneAsync(habilidade);
         }
 
         public async Task UpdateAsync(int id, Habilidade habilidade)
         {
-            var existingHabilidade = await _context.Habilidades.FindAsync(id);
-            if (existingHabilidade != null)
-            {
-                existingHabilidade.NomeHabilidade = habilidade.NomeHabilidade;
-                existingHabilidade.Tipo = habilidade.Tipo;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Habilidade>.Filter.Eq(h => h.IdHabilidade, id);
+
+            var update = Builders<Habilidade>.Update
+                .Set(h => h.NomeHabilidade, habilidade.NomeHabilidade)
+                .Set(h => h.Tipo, habilidade.Tipo);
+
+            await _habilidades.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var habilidade = await _context.Habilidades.FindAsync(id);
-            if (habilidade != null)
-            {
-                _context.Habilidades.Remove(habilidade);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Habilidade>.Filter.Eq(h => h.IdHabilidade, id);
+            await _habilidades.DeleteOneAsync(filter);
         }
     }
 }

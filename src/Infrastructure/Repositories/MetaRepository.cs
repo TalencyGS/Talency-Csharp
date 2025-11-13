@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,55 +9,58 @@ namespace Infrastructure.Repositories
 {
     public class MetaRepository : IMetaRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Meta> _metas;
 
-        public MetaRepository(OracleDbContext context)
+        public MetaRepository(MongoDbContext context)
         {
-            _context = context;
+            _metas = context.Metas;
         }
 
         public async Task<List<Meta>> GetAllAsync()
         {
-            return await _context.Metas.ToListAsync();
+            return await _metas
+                .Find(Builders<Meta>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Meta?> GetByIdAsync(int id)
         {
-            return await _context.Metas.FindAsync(id);
+            var filter = Builders<Meta>.Filter.Eq(m => m.IdMeta, id);
+
+            return await _metas
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Meta>> GetByRoadmapIdAsync(int roadmapId)
         {
-            return await _context.Metas
-                .Where(meta => meta.IdRoadmap == roadmapId)
+            var filter = Builders<Meta>.Filter.Eq(m => m.IdRoadmap, roadmapId);
+
+            return await _metas
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(Meta meta)
         {
-            await _context.Metas.AddAsync(meta);
-            await _context.SaveChangesAsync();
+            await _metas.InsertOneAsync(meta);
         }
 
         public async Task UpdateAsync(int id, Meta meta)
         {
-            var existingMeta = await _context.Metas.FindAsync(id);
-            if (existingMeta != null)
-            {
-                existingMeta.Descricao = meta.Descricao;
-                existingMeta.Status = meta.Status;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Meta>.Filter.Eq(m => m.IdMeta, id);
+
+            var update = Builders<Meta>.Update
+                .Set(m => m.Descricao, meta.Descricao)
+                .Set(m => m.Status, meta.Status);
+
+            await _metas.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var meta = await _context.Metas.FindAsync(id);
-            if (meta != null)
-            {
-                _context.Metas.Remove(meta);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Meta>.Filter.Eq(m => m.IdMeta, id);
+            await _metas.DeleteOneAsync(filter);
         }
     }
 }

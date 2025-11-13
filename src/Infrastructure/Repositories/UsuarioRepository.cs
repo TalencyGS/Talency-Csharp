@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,56 +9,60 @@ namespace Infrastructure.Repositories
 {
     public class UsuarioRepository : IUsuarioRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Usuario> _usuarios;
 
-        public UsuarioRepository(OracleDbContext context)
+        public UsuarioRepository(MongoDbContext context)
         {
-            _context = context;
+            _usuarios = context.Usuarios;
         }
 
         public async Task<List<Usuario>> GetAllAsync()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _usuarios
+                .Find(Builders<Usuario>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Usuario?> GetByIdAsync(int id)
         {
-            return await _context.Usuarios.FindAsync(id);
+            var filter = Builders<Usuario>.Filter.Eq(u => u.IdUsuario, id);
+
+            return await _usuarios
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task CreateAsync(Usuario usuario)
         {
-            await _context.Usuarios.AddAsync(usuario);
-            await _context.SaveChangesAsync();
+            await _usuarios.InsertOneAsync(usuario);
         }
 
         public async Task UpdateAsync(int id, Usuario usuario)
         {
-            var existingUsuario = await _context.Usuarios.FindAsync(id);
-            if (existingUsuario != null)
-            {
-                existingUsuario.Nome = usuario.Nome;
-                existingUsuario.Email = usuario.Email;
-                existingUsuario.SenhaHash = usuario.SenhaHash;
-                existingUsuario.AreaInteresse = usuario.AreaInteresse;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Usuario>.Filter.Eq(u => u.IdUsuario, id);
+
+            var update = Builders<Usuario>.Update
+                .Set(u => u.Nome, usuario.Nome)
+                .Set(u => u.Email, usuario.Email)
+                .Set(u => u.SenhaHash, usuario.SenhaHash)
+                .Set(u => u.AreaInteresse, usuario.AreaInteresse);
+
+            await _usuarios.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario != null)
-            {
-                _context.Usuarios.Remove(usuario);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Usuario>.Filter.Eq(u => u.IdUsuario, id);
+            await _usuarios.DeleteOneAsync(filter);
         }
 
         public async Task<Usuario?> GetByEmailAsync(string email)
         {
-            return await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var filter = Builders<Usuario>.Filter.Eq(u => u.Email, email);
+
+            return await _usuarios
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
     }
 }

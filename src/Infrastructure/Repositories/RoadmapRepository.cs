@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
 using Infrastructure.Context;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,55 +9,58 @@ namespace Infrastructure.Repositories
 {
     public class RoadmapRepository : IRoadmapRepository
     {
-        private readonly OracleDbContext _context;
+        private readonly IMongoCollection<Roadmap> _roadmaps;
 
-        public RoadmapRepository(OracleDbContext context)
+        public RoadmapRepository(MongoDbContext context)
         {
-            _context = context;
+            _roadmaps = context.Roadmaps;
         }
 
         public async Task<List<Roadmap>> GetAllAsync()
         {
-            return await _context.Roadmaps.ToListAsync();
+            return await _roadmaps
+                .Find(Builders<Roadmap>.Filter.Empty)
+                .ToListAsync();
         }
 
         public async Task<Roadmap?> GetByIdAsync(int id)
         {
-            return await _context.Roadmaps.FindAsync(id);
+            var filter = Builders<Roadmap>.Filter.Eq(r => r.IdRoadmap, id);
+
+            return await _roadmaps
+                .Find(filter)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<Roadmap>> GetByUsuarioIdAsync(int usuarioId)
         {
-            return await _context.Roadmaps
-                .Where(roadmap => roadmap.IdUsuario == usuarioId)
+            var filter = Builders<Roadmap>.Filter.Eq(r => r.IdUsuario, usuarioId);
+
+            return await _roadmaps
+                .Find(filter)
                 .ToListAsync();
         }
 
         public async Task CreateAsync(Roadmap roadmap)
         {
-            await _context.Roadmaps.AddAsync(roadmap);
-            await _context.SaveChangesAsync();
+            await _roadmaps.InsertOneAsync(roadmap);
         }
 
         public async Task UpdateAsync(int id, Roadmap roadmap)
         {
-            var existingRoadmap = await _context.Roadmaps.FindAsync(id);
-            if (existingRoadmap != null)
-            {
-                existingRoadmap.Status = roadmap.Status;
-                existingRoadmap.Trilha = roadmap.Trilha;
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Roadmap>.Filter.Eq(r => r.IdRoadmap, id);
+
+            var update = Builders<Roadmap>.Update
+                .Set(r => r.Status, roadmap.Status)
+                .Set(r => r.Trilha, roadmap.Trilha);
+
+            await _roadmaps.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteAsync(int id)
         {
-            var roadmap = await _context.Roadmaps.FindAsync(id);
-            if (roadmap != null)
-            {
-                _context.Roadmaps.Remove(roadmap);
-                await _context.SaveChangesAsync();
-            }
+            var filter = Builders<Roadmap>.Filter.Eq(r => r.IdRoadmap, id);
+            await _roadmaps.DeleteOneAsync(filter);
         }
     }
 }
