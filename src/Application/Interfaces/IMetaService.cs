@@ -15,3 +15,4 @@ namespace Application.Interfaces
         Task<MetaResponse> UpdateMetaAsync(int id, MetaRequest request);
         Task DeleteMetaAsync(int id);
     }
+}

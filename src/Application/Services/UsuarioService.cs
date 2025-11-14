@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Usuario;
 using Domain.Entities;
 using Domain.Repositories;
+using Infrastructure.Security;
 
 namespace Application.Services
 {
