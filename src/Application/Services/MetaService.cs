@@ -104,4 +104,5 @@ namespace Application.Services
 
             await _metaRepository.DeleteAsync(id);
         }
+    }
 }

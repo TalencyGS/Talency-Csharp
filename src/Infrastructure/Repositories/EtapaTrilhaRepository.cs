@@ -2,18 +2,18 @@
 using Domain.Repositories;
 using Infrastructure.Context;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
     public class EtapaTrilhaRepository : IEtapaTrilhaRepository
     {
         private readonly IMongoCollection<EtapaTrilha> _etapasTrilha;
+        private readonly IMongoCollection<Trilha> _trilhas;
 
         public EtapaTrilhaRepository(MongoDbContext context)
         {
             _etapasTrilha = context.EtapasTrilha;
+            _trilhas = context.Trilhas;
         }
 
         public async Task<List<EtapaTrilha>> GetAllAsync()
@@ -26,8 +26,15 @@ namespace Infrastructure.Repositories
         public async Task<EtapaTrilha?> GetByIdAsync(int id)
         {
             var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdEtapa, id);
-
             return await _etapasTrilha
+                .Find(filter)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Trilha?> GetTrilhaByIdAsync(int id)
+        {
+            var filter = Builders<Trilha>.Filter.Eq(t => t.IdTrilha, id);
+            return await _trilhas
                 .Find(filter)
                 .FirstOrDefaultAsync();
         }
@@ -35,7 +42,6 @@ namespace Infrastructure.Repositories
         public async Task<List<EtapaTrilha>> GetByTrilhaIdAsync(int trilhaId)
         {
             var filter = Builders<EtapaTrilha>.Filter.Eq(e => e.IdTrilha, trilhaId);
-
             return await _etapasTrilha
                 .Find(filter)
                 .ToListAsync();

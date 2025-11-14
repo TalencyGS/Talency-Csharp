@@ -50,8 +50,17 @@ namespace Application.Services
 
         public async Task<EtapaTrilhaResponse> CreateEtapaTrilhaAsync(EtapaTrilhaRequest request)
         {
+
+            var trilha = await _etapaTrilhaRepository.GetTrilhaByIdAsync(request.IdTrilha);
+
+            if (trilha == null)
+            {
+                throw new KeyNotFoundException("Trilha não encontrada.");
+            }
+
             var etapaTrilha = EtapaTrilha.Create(
-                new Trilha { IdTrilha = request.IdTrilha },
+                trilha,
+                request.Titulo,
                 request.Descricao,
                 request.Ordem
             );
