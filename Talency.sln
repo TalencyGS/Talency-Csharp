@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "src\Api\Api.csproj", "{58332DD9-59C7-4C86-9574-DB83E93E094A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,18 @@ Global
 		{58332DD9-59C7-4C86-9574-DB83E93E094A}.Release|x64.Build.0 = Release|Any CPU
 		{58332DD9-59C7-4C86-9574-DB83E93E094A}.Release|x86.ActiveCfg = Release|Any CPU
 		{58332DD9-59C7-4C86-9574-DB83E93E094A}.Release|x86.Build.0 = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|x64.Build.0 = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Debug|x86.Build.0 = Debug|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|x64.ActiveCfg = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|x64.Build.0 = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|x86.ActiveCfg = Release|Any CPU
+		{9FDCB7DB-225B-44D1-80F4-6C03E3B48A36}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using MongoDB.Bson.Serialization;
 
 namespace Infrastructure.Context
 {
@@ -8,11 +9,31 @@ namespace Infrastructure.Context
     {
         private readonly IMongoDatabase _database;
 
+        static MongoDbContext()
+        {
+            if (!BsonClassMap.IsClassMapRegistered(typeof(Usuario)))
+            {
+                BsonClassMap.RegisterClassMap<Usuario>(cm =>
+                {
+                    cm.AutoMap();
+                    cm.SetIgnoreExtraElements(true);
+                });
+            }
+        }
+
         public MongoDbContext(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("MongoDbConnection");
+            var connectionString = configuration["MongoDb:ConnectionString"];
+            var databaseName = configuration["MongoDb:Database"];
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new ArgumentNullException(nameof(connectionString), "MongoDb:ConnectionString não está configurada.");
+
+            if (string.IsNullOrWhiteSpace(databaseName))
+                throw new ArgumentNullException(nameof(databaseName), "MongoDb:Database não está configurada.");
+
             var client = new MongoClient(connectionString);
-            _database = client.GetDatabase("TalentRoad");
+            _database = client.GetDatabase(databaseName);
         }
 
         public IMongoCollection<Usuario> Usuarios => _database.GetCollection<Usuario>("Usuarios");
