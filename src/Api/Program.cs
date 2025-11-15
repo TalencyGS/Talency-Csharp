@@ -58,6 +58,8 @@ builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 builder.Services.AddScoped<ITokenService>(provider => new TokenService(builder.Configuration["Jwt:Key"]));
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -108,6 +110,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment())
 {
