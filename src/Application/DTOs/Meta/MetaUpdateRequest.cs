@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs.Roadmap
+namespace Application.DTOs.Meta
 {
     public class MetaUpdateRequest
     {

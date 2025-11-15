@@ -1,5 +1,4 @@
-﻿
-namespace Application.DTOs.Roadmap
+﻿namespace Application.DTOs.Meta
 {
     public class MetaCreateRequest
     {

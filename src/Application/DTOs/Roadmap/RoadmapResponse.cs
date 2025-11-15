@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Paginacao;
+using Application.DTOs.Meta;
 
 namespace Application.DTOs.Roadmap
 {
