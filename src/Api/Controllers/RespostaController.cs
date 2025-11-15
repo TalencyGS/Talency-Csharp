@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Resposta;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RespostaController : ControllerBase
     {
         private readonly IRespostaService _respostaService;

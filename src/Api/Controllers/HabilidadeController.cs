@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Habilidade;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class HabilidadeController : ControllerBase
     {
         private readonly IHabilidadeService _habilidadeService;

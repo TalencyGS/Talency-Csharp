@@ -44,6 +44,9 @@ builder.Services.AddScoped<IRespostaRepository, RespostaRepository>();
 builder.Services.AddScoped<ITesteRepository, TesteRepository>();
 builder.Services.AddScoped<IUsuarioHabilidadeRepository, UsuarioHabilidadeRepository>();
 
+builder.Services.AddScoped<IEtapaTrilhaRepository, EtapaTrilhaRepository>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<ITrilhaService, TrilhaService>();
 builder.Services.AddScoped<IMetaService, MetaService>();
@@ -55,7 +58,11 @@ builder.Services.AddScoped<IHabilidadeService, HabilidadeService>();
 builder.Services.AddScoped<IUsuarioHabilidadeService, UsuarioHabilidadeService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 
-builder.Services.AddScoped<ITokenService>(provider => new TokenService(builder.Configuration["Jwt:Key"]));
+builder.Services.AddScoped<IEtapaTrilhaService, EtapaTrilhaService>();
+
+builder.Services.AddScoped<ITokenService>(provider =>
+    new TokenService(builder.Configuration["Jwt:Key"]));
+
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 builder.Services.AddHealthChecks();
@@ -71,7 +78,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
 
@@ -86,6 +94,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "API para gerenciar o sistema de dashboards e usuários"
     });
+
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -93,6 +102,7 @@ builder.Services.AddSwaggerGen(options =>
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
     });
+
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
