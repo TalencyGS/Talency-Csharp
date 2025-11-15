@@ -55,6 +55,9 @@ builder.Services.AddScoped<IHabilidadeService, HabilidadeService>();
 builder.Services.AddScoped<IUsuarioHabilidadeService, UsuarioHabilidadeService>();
 builder.Services.AddScoped<IRoadmapService, RoadmapService>();
 
+builder.Services.AddScoped<ITokenService>(provider => new TokenService(builder.Configuration["Jwt:Key"]));
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
