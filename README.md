@@ -12,6 +12,14 @@ A API expõe emdpoints para:
 
 ---
 
+## Deploy
+
+A API está publicada no Azure e pronta para testes:
+
+**[Acessar Swagger](http://talency-webapp-gs.azurewebsites.net/swagger/index.html)**
+
+---
+
 ## 👥 Integrantes
 
 - **Felipe Menezes Prometti** – RM555174 – 2TDSPM  
